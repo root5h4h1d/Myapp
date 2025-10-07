@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Tic Tac Toe</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f4f7;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .container {
+        text-align: center;
+    }
+    h1 {
+        color: #333;
+    }
+    .mode-selection button {
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+        border: none;
+        background: #4caf50;
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+    }
+    .mode-selection button:hover {
+        background: #45a049;
+    }
+    .scoreboard {
+        margin: 20px 0;
+        font-size: 18px;
+    }
+    .board {
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        grid-template-rows: repeat(3, 100px);
+        gap: 5px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .cell {
+        background: #fff;
+        border: 2px solid #333;
+        font-size: 48px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+    .cell.winning-cell {
+        background-color: #ffeb3b;
+    }
+    #resetBtn {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        background: #f44336;
+        color: white;
+        border-radius: 5px;
+    }
+    #resetBtn:hover {
+        background: #e53935;
+    }
+    #message {
+        margin-top: 15px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Advanced Tic Tac Toe</h1>
+    <div class="mode-selection">
+        <button id="pvpBtn">Player vs Player</button>
+        <button id="pvcBtn">Player vs Computer</button>
+    </div>
+    <div class="scoreboard">
+        <span>Player X: <span id="scoreX">0</span></span>
+        <span>Player O: <span id="scoreO">0</span></span>
+    </div>
+    <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+    <button id="resetBtn">Reset Game</button>
+    <p id="message"></p>
+</div>
+
+<script>
+const board = document.getElementById('board');
+const cells = document.querySelectorAll('.cell');
+const message = document.getElementById('message');
+const scoreXElem = document.getElementById('scoreX');
+const scoreOElem = document.getElementById('scoreO');
+const pvpBtn = document.getElementById('pvpBtn');
+const pvcBtn = document.getElementById('pvcBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+let boardState = Array(9).fill('');
+let currentPlayer = 'X';
+let gameMode = 'pvp'; // 'pvp' or 'pvc'
+let score = { X: 0, O: 0 };
+let gameOver = false;
+
+const winningCombos = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+];
+
+function checkWinner() {
+    for (let combo of winningCombos) {
+        const [a, b, c] = combo;
+        if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+            combo.forEach(i => cells[i].classList.add('winning-cell'));
+            score[boardState[a]]++;
+            updateScore();
+            message.textContent = `Player ${boardState[a]} wins!`;
+            gameOver = true;
+            return true;
+        }
+    }
+    if (!boardState.includes('')) {
+        message.textContent = "It's a Draw!";
+        gameOver = true;
+        return true;
+    }
+    return false;
+}
+
+function updateScore() {
+    scoreXElem.textContent = score.X;
+    scoreOElem.textContent = score.O;
+}
+
+function handleMove(index) {
+    if (boardState[index] !== '' || gameOver) return;
+    boardState[index] = currentPlayer;
+    cells[index].textContent = currentPlayer;
+    if (!checkWinner()) {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        if (gameMode === 'pvc' && currentPlayer === 'O') {
+            setTimeout(computerMove, 300);
+        }
+    }
+}
+
+function computerMove() {
+    let available = boardState.map((val,i) => val === '' ? i : null).filter(v => v !== null);
+    let move = available[Math.floor(Math.random() * available.length)];
+    handleMove(move);
+}
+
+function resetGame() {
+    boardState.fill('');
+    cells.forEach(cell => {
+        cell.textContent = '';
+        cell.classList.remove('winning-cell');
+    });
+    currentPlayer = 'X';
+    gameOver = false;
+    message.textContent = '';
+}
+
+cells.forEach(cell => {
+    cell.addEventListener('click', () => handleMove(parseInt(cell.dataset.index)));
+});
+
+pvpBtn.addEventListener('click', () => {
+    gameMode = 'pvp';
+    resetGame();
+});
+
+pvcBtn.addEventListener('click', () => {
+    gameMode = 'pvc';
+    resetGame();
+});
+
+resetBtn.addEventListener('click', resetGame);
+</script>
+</body>
+                          </html>
